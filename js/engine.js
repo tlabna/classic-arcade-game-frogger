@@ -23,11 +23,14 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime;
+        lastTime,
+        seconds,
+        timer,
+        game = new Game();
 
     canvas.width = 505;
     canvas.height = 606;
-    doc.body.appendChild(canvas);
+    doc.getElementById('game-board').appendChild(canvas);
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -56,7 +59,60 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
+         // Only want to do this is game hasn't completed
+        if (!game.stop){
+            win.requestAnimationFrame(main);
+        }
+    }
+
+    /* Function to set up a timer for the game. It takes a time in seconds and an instance of game */
+    function setTimer(time, game) {
+        timer = doc.getElementById('timer');
+        seconds = time;
+
+        // If 0 seconds then stop game
+        if (seconds === 0) {
+            game.gameOver();
+            game.stop = true;
+        }
+
+        // If game is ongoing, update the timer.
+        if (!game.stop) {
+            seconds--;
+            updateTimer();
+            win.setTimeout(function(){
+                setTimer(seconds, game);
+            }, 1000);
+        }
+    }
+
+    /* Function to update the timer every second */
+    function updateTimer() {
+        var timerHTML;
+        var tempSeconds = seconds;
+        var tempMinutes = Math.floor(seconds / 60) % 60;
+        tempSeconds -= tempMinutes * 60;
+        timerHTML = formatTimer(tempMinutes, tempSeconds);
+        timer.innerHTML = timerHTML;
+    }
+
+    /* Function to format text for the timer. Takes in two paramters, the remaining minutes and seconds */
+    function formatTimer(minutes, seconds) {
+        var formattedMinutes;
+        if (minutes < 10) {
+            formattedMinutes = '0' + minutes;
+        } else {
+            formattedMinutes = minutes;
+        }
+
+        var formattedSeconds;
+        if (seconds < 10) {
+            formattedSeconds = '0' + seconds;
+        } else {
+            formattedSeconds = seconds;
+        }
+
+        return formattedMinutes + ":" + formattedSeconds;
     }
 
     /* This function does some initial setup that should only occur once,
@@ -64,9 +120,28 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        reset();
         lastTime = Date.now();
-        main();
+        doc.getElementById('start').onclick = function() {
+            main();
+            setTimer(60, game);
+
+            // When user clicks on start show all game displays
+            doc.getElementById('score').innerHTML = 'Score: ' + game.score;
+           doc.getElementById('life').innerHTML = 'Life: ' + game.life;
+            doc.getElementById('timer').style.display = 'inline-block';
+           doc.getElementById('life').style.display = 'inline-block';
+           doc.getElementById('score').style.display = 'inline-block';
+           doc.getElementById('restart').style.display = 'inline-block';
+           doc.getElementById('game-board').style.display = 'inline-block';
+
+           // Hide the game introduction
+           var instructions = doc.getElementById('instructions');
+           instructions.parentNode.removeChild(instructions);
+           var startButton = doc.getElementById('start');
+           startButton.parentNode.removeChild(startButton);
+           var header = doc.getElementById('header');
+           header.parentNode.removeChild(header);
+        };
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -80,7 +155,9 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        game.checkCollisions();
+        game.checkDestination();
+        game.checkPlayerItems();
     }
 
     /* This is called by the update function and loops through all of the
@@ -91,10 +168,11 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-        allEnemies.forEach(function(enemy) {
+        game.allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+        game.player.update(dt);
+        game.playerItem.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -107,6 +185,14 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
+        var topRowImages = [
+            'images/water-block.png',
+            'images/water-block.png',
+            'images/stone-block.png',
+            'images/water-block.png',
+            'images/water-block.png'
+            ];
+
         var rowImages = [
                 'images/water-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
@@ -120,10 +206,17 @@ var Engine = (function(global) {
             row, col;
 
         /* Loop through the number of rows and columns we've defined above
-         * and, using the rowImages array, draw the correct image for that
+         * and, using the toprowImages & rowImages array, draw the correct image for that
          * portion of the "grid"
          */
-        for (row = 0; row < numRows; row++) {
+
+        // top row
+        for (col = 0; col < numCols; col++) {
+            ctx.drawImage(Resources.get(topRowImages[col]), col * 101, 0);
+        }
+
+        // rest of the rows but skip the top row
+        for (row = 1; row < numRows; row++) {
             for (col = 0; col < numCols; col++) {
                 /* The drawImage function of the canvas' context element
                  * requires 3 parameters: the image to draw, the x coordinate
@@ -147,22 +240,16 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-        allEnemies.forEach(function(enemy) {
+        game.allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
-        player.render();
+        game.player.render();
+        game.playerItem.render();
+        game.render();
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
-     */
-    function reset() {
-        // noop
-    }
-
-    /* Go ahead and load all of the images we know we're going to need to
+    /* Go ahead and load all of the image()s we know we're going to need to
      * draw our game level. Then set init as the callback method, so that when
      * all of these images are properly loaded our game will start.
      */
@@ -171,7 +258,11 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-princess-girl.png',
+        'images/Heart.png',
+        'images/Gem Blue.png',
+        'images/Gem Green.png',
+        'images/Rock.png'
     ]);
     Resources.onReady(init);
 

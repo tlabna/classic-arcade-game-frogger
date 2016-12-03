@@ -1,13 +1,47 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Effective JavaScript: Frogger</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
+    <header>
+        <h1 id="header">Arcade Game</h1>
+        <div id="instructions">
+            <img id="arrow-keys" src="images/arrow-keys.svg">
+            <h2 id="main-instructions">Using your arrow keys help the Princess get to the other side as many times as you can in <strong>1 minute</strong>. You get <strong>+1 point</strong> if you get to the other side safely.</h2>
+            <h2>Collect the following items for extra bonuses:</h2>
+            <ul>
+                <li><img class="list-image" src="images/Gem Green.png"> <span>Bug speed decreases<span></li>
+                <li><img class="list-image" src="images/Gem Blue.png"> <span>+5 points</span></li>
+                <li><img class="list-image" src="images/Heart.png"> <span>+1 life</span></li>
+            </ul>
+            <h2>Avoid the following items:</h2>
+            <ul>
+                <li><img class="list-image" src="images/enemy-bug.png"> <span>-1 life</span></li>
+                <li><img class="list-image" src="images/water-block.png"> <span>-1 life</span></li>
+                <li><img class="list-image" src="images/Rock.png"> <span>-1 life</span></li>
+            </ul>
+        </div>
+        <div id="timer"></div>
+        <div id="life"></div>
+        <div id="score"></div>
+        <button id="start">Start</button>
+        <!-- history.go(0) will refresh the page -->
+        <button id="restart" onClick="history.go(0)">Restart</button>
+    </header>
+    <div id="game-board"></div>
+    <div>
+        <h1 id="no-life"></h1>
+        <h1 id="gameOverMessage"></h1>
+    </div>
+    <!-- Load scripts once page has rendered -->
     <script src="js/resources.js"></script>
     <script src="js/app.js"></script>
     <script src="js/engine.js"></script>
 </body>
+
 </html>

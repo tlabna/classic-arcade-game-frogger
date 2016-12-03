@@ -1,3 +1,97 @@
+@import url(http://fonts.googleapis.com/css?family=Lato:300,400,700);
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Lato', Arial, sans-serif;
+    color: #4d4d4d;
+}
+
 body {
     text-align: center;
+}
+
+header {
+    text-align: center;
+}
+
+h1 {
+    font-size: 60px;
+    margin-top: 20px;
+    font-weight: 400;
+}
+
+h2 {
+    text-align: left;
+    font-size: 16px;
+    font-weight: 300;
+    margin: 20px auto 10px auto;
+    width: 600px;
+}
+
+ul {
+    list-style-type: none;
+    text-align: left;
+    width: 400px;
+    margin: 0 auto;
+    font-size: 20px;
+}
+
+.list-image {
+    max-width: 20px;
+    height: auto;
+}
+
+
+/* vertically centering text in block */
+
+li {
+    position: relative;
+}
+
+li span {
+    position: absolute;
+    top: 60%;
+    transform: translateY(-50%);
+    margin-left: 20px;
+}
+
+#arrow-keys {
+    max-width: 80px;
+    height: auto;
+}
+
+#score,
+#life,
+#timer,
+#restart {
+    display: none;
+    margin: 20px 30px;
+    font-size: 30px;
+    font-weight: 300;
+}
+
+#game-board {
+    display: none;
+    margin: 0 30px 20px;
+}
+
+#instructions {
+    margin-bottom: 30px;
+}
+
+#main-instructions {
+    margin-top: 0;
+}
+
+button {
+    font-size: 25px;
+    font-weight: 300;
+    color: #fff;
+    background-color: #0086B3;
+    padding: 10px 20px;
+    border: 0;
+}
+
+button:hover {
+    background-color: #4DD2FF;
 }
