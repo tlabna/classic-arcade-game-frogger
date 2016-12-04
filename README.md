@@ -13,3 +13,8 @@ The purpose of this project was to recreate the classic arcade game **Frogger**.
 2. Open **index.html** with your favourite browser.
 
 3. Thats it!
+
+### References
+
+[Udacity JS Helper](https://github.com/udacity/frontend-nanodegree-arcade-game)
+[Andela-Ftchirou Example](https://github.com/andela-ftchirou/arcade-game)
